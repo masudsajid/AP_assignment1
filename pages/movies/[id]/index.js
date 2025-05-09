@@ -1,125 +1,201 @@
 import React from "react";
 import axios from "axios";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { useRouter } from "next/router";
+import { useContext } from "react";
+import { ThemeContext } from "../../_app";
+import { 
+  AppBar, 
+  Toolbar, 
+  Typography, 
+  Button, 
+  Container, 
+  Box, 
+  Paper,
+  IconButton,
+  Divider
+} from '@mui/material';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+import StarIcon from '@mui/icons-material/Star';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
-const index = (props) => {
-  const movie = props.movie;
+const MovieDetails = ({ movie }) => {
   const router = useRouter();
+  const { mode, toggleTheme } = useContext(ThemeContext);
+  
+  if (!movie) {
+    return (
+      <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary' }}>
+        <AppBar position="static" color="primary">
+          <Toolbar>
+            <Typography variant="h5" sx={{ flexGrow: 1, fontWeight: 700 }}>
+              Movie Details
+            </Typography>
+            <IconButton sx={{ ml: 1 }} onClick={toggleTheme} color="inherit">
+              {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+        <Container sx={{ py: 6 }}>
+          <Button
+            startIcon={<ArrowBackIcon />}
+            onClick={() => router.back()}
+            sx={{ mb: 4 }}
+          >
+            Back
+          </Button>
+          <Paper sx={{ p: 4, textAlign: 'center' }}>
+            <Typography variant="h5">Movie not found</Typography>
+          </Paper>
+        </Container>
+      </Box>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 py-12">
-      <div className="max-w-4xl mx-auto px-4">
-        <button
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary' }}>
+      <AppBar position="static" color="primary">
+        <Toolbar>
+          <Typography variant="h5" sx={{ flexGrow: 1, fontWeight: 700 }}>
+            {movie.title}
+          </Typography>
+          <IconButton sx={{ ml: 1 }} onClick={toggleTheme} color="inherit">
+            {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+          </IconButton>
+        </Toolbar>
+      </AppBar>
+      <Container sx={{ py: 6 }}>
+        <Button
+          startIcon={<ArrowBackIcon />}
           onClick={() => router.back()}
-          className="mb-8 flex items-center gap-2 text-indigo-300 hover:text-white transition-colors text-lg font-medium"
+          sx={{ mb: 4 }}
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
           Back
-        </button>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-gray-700/50"
+        </Button>
+        <Paper 
+          elevation={3}
+          sx={{ 
+            overflow: 'hidden',
+            bgcolor: 'background.paper'
+          }}
         >
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-6">
-            <motion.h1 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-3xl font-bold text-white tracking-tight leading-[1.1] pb-2"
-            >
+          <Box sx={{ 
+            bgcolor: 'primary.main',
+            p: 3
+          }}>
+            <Typography variant="h4" component="h1" sx={{ color: 'white', fontWeight: 600 }}>
               {movie.title}
-            </motion.h1>
-          </div>
-
-          <div className="p-8 space-y-6">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-6"
-            >
-              <div className="flex items-center space-x-3">
-                <span className="text-gray-400 font-medium">ID:</span>
-                <span className="text-white">{movie.id}</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <span className="text-gray-400 font-medium">Director ID:</span>
+            </Typography>
+          </Box>
+          <Box sx={{ p: 4 }}>
+            <Box sx={{ 
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+              gap: 3,
+              mb: 4
+            }}>
+              <Box>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Release Year
+                </Typography>
+                <Typography variant="body1">
+                  {movie.releaseYear}
+                </Typography>
+              </Box>
+              <Box>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Genre
+                </Typography>
                 <Link 
-                  className="text-indigo-400 hover:text-indigo-300 transition-colors" 
-                  href={`${movie.id}/director`}
+                  href={`/genres/${movie.genreId}`}
+                  style={{ textDecoration: 'none' }}
                 >
-                  {movie.directorId}
+                  <Typography 
+                    variant="body1" 
+                    sx={{ 
+                      color: 'primary.main',
+                      '&:hover': { textDecoration: 'underline' }
+                    }}
+                  >
+                    {movie.genreName}
+                  </Typography>
                 </Link>
-              </div>
-              <div className="flex items-center space-x-3">
-                <span className="text-gray-400 font-medium">Release Year:</span>
-                <span className="text-white">{movie.releaseYear}</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <span className="text-gray-400 font-medium">Genre:</span>
-                <span className="text-white">{movie.genreId}</span>
-              </div>
-            </motion.div>
+              </Box>
+              {movie.directorId && (
+                <Box>
+                  <Typography variant="subtitle1" color="text.secondary">
+                    Director
+                  </Typography>
+                  <Link 
+                    href={`/directors/${movie.directorId}`}
+                    style={{ textDecoration: 'none' }}
+                  >
+                    <Typography 
+                      variant="body1" 
+                      sx={{ 
+                        color: 'primary.main',
+                        '&:hover': { textDecoration: 'underline' }
+                      }}
+                    >
+                      {movie.directorName}
+                    </Typography>
+                  </Link>
+                </Box>
+              )}
+            </Box>
 
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="border-t border-gray-700/50 pt-6"
-            >
-              <h2 className="text-xl font-semibold text-white mb-3">Description</h2>
-              <p className="text-gray-400 leading-relaxed">{movie.description}</p>
-            </motion.div>
+            <Divider sx={{ my: 3 }} />
 
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5 }}
-              className="border-t border-gray-700/50 pt-6"
-            >
-              <div className="inline-flex items-center bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-3 rounded-full shadow-lg">
-                <svg className="w-6 h-6 text-white mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-                <span className="font-bold text-white text-lg">{movie.rating} / 10</span>
-              </div>
-            </motion.div>
-          </div>
-        </motion.div>
-      </div>
-    </div>
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Description
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                {movie.description}
+              </Typography>
+            </Box>
+
+            {movie.rating && (
+              <Box sx={{ 
+                display: 'inline-flex',
+                alignItems: 'center',
+                bgcolor: 'primary.main',
+                color: 'white',
+                px: 2,
+                py: 1,
+                borderRadius: 2
+              }}>
+                <StarIcon sx={{ mr: 1 }} />
+                <Typography variant="h6">
+                  {movie.rating} / 10
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 
-export default index;
+export default MovieDetails;
 
-export async function getStaticProps(context) {
-  const id = context.params.id;
-  console.log(id);
-  const movie = await axios.post("http://localhost:3000/api/movies", { id });
-  console.log(movie.data);
-  return {
-    props: { movie: movie.data },
-  };
+export async function getServerSideProps(context) {
+  try {
+    const { id } = context.params;
+    const response = await axios.get(`http://localhost:3000/api/movies/${id}`);
+    return {
+      props: { 
+        movie: response.data || null 
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching movie:', error);
+    return {
+      props: { 
+        movie: null 
+      }
+    };
+  }
 }
-
-export const getStaticPaths = () => {
-  return {
-    paths: [
-      {
-        params: {
-          id: "1",
-        },
-      },
-      {
-        params: {
-          id: "2",
-        },
-      },
-    ],
-    fallback: "blocking", 
-  };
-};

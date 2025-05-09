@@ -1,87 +1,96 @@
-import axios from "axios";
-import React from "react";
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { useRouter } from "next/router";
+import React from 'react';
+import Link from 'next/link';
+import { useContext } from 'react';
+import { ThemeContext } from '../_app';
+import { 
+  AppBar, 
+  Toolbar, 
+  Typography, 
+  Container, 
+  Box, 
+  Grid,
+  Card,
+  CardContent,
+  CardActionArea,
+  IconButton
+} from '@mui/material';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 
-const index = ({ genres }) => {
-  const router = useRouter();
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const item = {
-    hidden: { y: 20, opacity: 0 },
-    show: { y: 0, opacity: 1 }
-  };
+const GenresPage = ({ genres }) => {
+  const { mode, toggleTheme } = useContext(ThemeContext);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 py-12 px-4">
-      <div className="container mx-auto">
-        <button
-          onClick={() => router.back()}
-          className="mb-8 flex items-center gap-2 text-indigo-300 hover:text-white transition-colors text-lg font-medium"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
-          Back
-        </button>
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
-        >
-          <h1 className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 mb-4 leading-[1.1] pb-2">
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary' }}>
+      <AppBar position="static" color="primary">
+        <Toolbar>
+          <Typography variant="h5" sx={{ flexGrow: 1, fontWeight: 700 }}>
             Movie Genres
-          </h1>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Explore movies by their genres and discover new favorites
-          </p>
-        </motion.div>
-
-        <motion.div 
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-        >
-          {genres.map((genre, index) => (
-            <motion.div
-              key={genre.id}
-              variants={item}
-              whileHover={{ y: -10 }}
-            >
-              <Link 
-                href={`/genres/${genre.id}`} 
-                className="group block bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden transform transition-all duration-300 hover:shadow-2xl border border-gray-700/50 p-8"
+          </Typography>
+          <IconButton sx={{ ml: 1 }} onClick={toggleTheme} color="inherit">
+            {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+          </IconButton>
+        </Toolbar>
+      </AppBar>
+      <Container sx={{ py: 6 }}>
+        <Grid container spacing={4}>
+          {genres.map((genre) => (
+            <Grid item key={genre._id} xs={12} sm={6} md={4}>
+              <Card 
+                sx={{ 
+                  height: '100%',
+                  bgcolor: 'background.paper',
+                  transition: 'transform 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-8px)'
+                  }
+                }}
               >
-                <div className="text-indigo-400 text-sm font-medium mb-2">Genre ID: {genre.id}</div>
-                <div className="text-2xl font-bold text-white group-hover:text-indigo-400 transition-colors">
-                  {genre.name}
-                </div>
-                <div className="mt-4 pt-4 border-t border-gray-700/50">
-                  <span className="text-gray-400 text-sm">Click to explore movies in this genre</span>
-                </div>
-              </Link>
-            </motion.div>
+                <CardActionArea 
+                  component={Link} 
+                  href={`/genres/${genre._id}`}
+                  sx={{ height: '100%' }}
+                >
+                  <CardContent>
+                    <Typography variant="subtitle2" color="primary" sx={{ mb: 1 }}>
+                      Genre ID: {genre._id}
+                    </Typography>
+                    <Typography variant="h5" component="div" sx={{ mb: 2 }}>
+                      {genre.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Click to explore movies in this genre
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            </Grid>
           ))}
-        </motion.div>
-      </div>
-    </div>
+        </Grid>
+      </Container>
+    </Box>
   );
 };
 
-export default index;
+export default GenresPage;
 
-export async function getServerSideProps() {
-  const genres = await axios.get("http://localhost:3000/api/genre");
-  return {
-    props: { genres: genres.data },
-  };
+export async function getStaticProps() {
+  try {
+    const response = await fetch('http://localhost:3000/api/genre');
+    const genres = await response.json();
+    return {
+      props: {
+        genres: genres || []
+      },
+      revalidate: 20
+    };
+  } catch (error) {
+    console.error('Error fetching genres:', error);
+    return {
+      props: {
+        genres: []
+      },
+      revalidate: 20
+    };
+  }
 }

@@ -1,125 +1,93 @@
 import axios from "axios";
-import { useRouter } from "next/router";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { useRouter } from "next/router";
+import { useContext } from "react";
+import { ThemeContext } from "./_app";
+import { AppBar, Toolbar, Typography, Button, Container, Grid, Card, CardContent, CardActions, IconButton, Switch, Box } from '@mui/material';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 
-export default function Home({movies}) {
+export default function Home({ movies }) {
   const router = useRouter();
-  const func = () => {
-    router.push("/genres");
-  };
-
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const item = {
-    hidden: { y: 20, opacity: 0 },
-    show: { y: 0, opacity: 1 }
-  };
+  const { mode, toggleTheme } = useContext(ThemeContext);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
-      <div className="container mx-auto px-4 py-12">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
-        >
-          <h1 className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 mb-4 leading-[1.1] pb-2">
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary' }}>
+      <AppBar position="static" color="primary">
+        <Toolbar>
+          <Typography variant="h5" sx={{ flexGrow: 1, fontWeight: 700 }}>
             Trending Movies
-          </h1>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Discover the most popular and highly-rated movies of the moment
-          </p>
-        </motion.div>
-
-        <div className="flex flex-row items-center justify-center gap-6 mb-16">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={func}
-            className="rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 py-3 px-8 text-white font-medium shadow-lg hover:shadow-xl"
-          >
+          </Typography>
+          <IconButton sx={{ ml: 1 }} onClick={toggleTheme} color="inherit">
+            {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+          </IconButton>
+        </Toolbar>
+      </AppBar>
+      <Container sx={{ py: 6 }}>
+        <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
+          <Button variant="contained" color="secondary" onClick={() => router.push('/genres')}>
             Browse Genres
-          </motion.button>
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Link
-              href={'/movies'}
-              className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-300 py-3 px-8 text-white font-medium shadow-lg hover:shadow-xl"
-            >
-              All Movies
-            </Link>
-          </motion.div>
-        </div>
-
-        <motion.div 
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-        >
-          {movies.map((movie, index) => (
-            <motion.div
-              key={movie.id || index}
-              variants={item}
-              whileHover={{ y: -10 }}
-            >
-              <Link
-                className="group block bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden transform transition-all duration-300 hover:shadow-2xl border border-gray-700/50"
-                href={`/movies/${movie.id}`}
-              >
-                <div className="p-6">
-                  <h2 className="text-2xl font-bold text-white mb-3 group-hover:text-indigo-400 transition-colors">
+          </Button>
+          <Button variant="contained" color="primary" component={Link} href="/movies">
+            All Movies
+          </Button>
+        </Box>
+        <Grid container spacing={4}>
+          {movies && movies.map((movie, index) => (
+            <Grid item key={movie._id || index} xs={12} sm={6} md={4}>
+              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: 'background.paper' }}>
+                <CardContent>
+                  <Typography gutterBottom variant="h6" component="div" sx={{ fontWeight: 600 }}>
                     {movie.title}
-                  </h2>
+                  </Typography>
                   {movie.description && (
-                    <p className="text-gray-400 text-sm mb-4 line-clamp-3">
-                      {movie.description}
-                    </p>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      {movie.description.substring(0, 100)}...
+                    </Typography>
                   )}
                   {movie.releaseYear && (
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700/50">
-                      <span className="text-sm text-gray-400">
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+                      <Typography variant="caption" color="text.secondary">
                         Released: {movie.releaseYear}
-                      </span>
+                      </Typography>
                       {movie.rating && (
-                        <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                        <Box sx={{ bgcolor: 'primary.main', color: 'white', px: 1.5, py: 0.5, borderRadius: 2, fontSize: 14 }}>
                           ★ {movie.rating}
-                        </span>
+                        </Box>
                       )}
-                    </div>
+                    </Box>
                   )}
-                </div>
-              </Link>
-            </motion.div>
+                </CardContent>
+                <CardActions>
+                  <Button size="small" color="primary" component={Link} href={`/movies/${movie._id}`}>
+                    View Details
+                  </Button>
+                </CardActions>
+              </Card>
+            </Grid>
           ))}
-        </motion.div>
-      </div>
-    </div>
+        </Grid>
+      </Container>
+    </Box>
   );
 }
 
 export async function getStaticProps() {
-  const movies = await axios.get("http://localhost:3000/api/trendy");
-  if(!movies){
+  try {
+    const response = await axios.get("http://localhost:3000/api/trendy");
     return {
-      notFound:true,
-    }
-  } 
-  return {
-    props: {
-      movies:movies.data
-    },revalidate:20,
-  };
+      props: {
+        movies: response.data || [],
+      },
+      revalidate: 20,
+    };
+  } catch (error) {
+    console.error('Error fetching movies:', error);
+    return {
+      props: {
+        movies: [],
+      },
+      revalidate: 20,
+    };
+  }
 }

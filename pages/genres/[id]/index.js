@@ -4,6 +4,7 @@ import useSWR from 'swr'
 import Link from 'next/link'
 
 const fetcher = (url) => fetch(url).then(res => res.json())
+
 const index = () => {
     const router = useRouter()
     const value = router.query.id;
@@ -11,46 +12,56 @@ const index = () => {
  
     if (error) return <div>failed to load</div>
     if (isLoading) return <div>loading...</div>
-    const movies = data.filter((movie,index)=>movie.genreId===value);
-    console.log(movies);
-  return (
-    <div className='flex flex-col items-center justify-center gap-4 m-4'>
-        <div className='text-4xl font-bold tracking-tighter'>Genre: {value}</div>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        
-          {movies.map((movie, index) => (
-            <Link
-              key={movie.id || index}
-              className="border rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105"
-              href={`/movies/${movie.id}`}
-            >
-              <div className="p-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                  {movie.title}
-                </h2>
-                {movie.description && (
-                  <p className="text-gray-600 text-sm mb-4">
-                    {movie.description.substring(0, 100)}...
-                  </p>
-                )}
-                {movie.releaseYear && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">
-                      Released: {movie.releaseYear}
-                    </span>
-                    {movie.rating && (
-                      <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-sm">
-                        ★ {movie.rating}
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-            </Link>
-          ))}
+    const movies = data.filter((movie, index) => movie.genreId === value);
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-900 py-12">
+            <div className="container mx-auto px-4">
+                <button
+                  onClick={() => router.back()}
+                  className="mb-8 flex items-center gap-2 text-indigo-300 hover:text-white transition-colors text-lg font-medium"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                  Back
+                </button>
+                <h1 className="text-5xl font-bold text-center text-white mb-12 tracking-tight leading-[1.1] pb-2">
+                    Genre: {value}
+                </h1>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {movies.map((movie, index) => (
+                        <Link
+                            key={movie.id || index}
+                            className="group bg-gray-800 rounded-xl shadow-2xl overflow-hidden transform transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
+                            href={`/movies/${movie.id}`}
+                        >
+                            <div className="p-6">
+                                <h2 className="text-2xl font-bold text-white mb-3 group-hover:text-indigo-400 transition-colors">
+                                    {movie.title}
+                                </h2>
+                                {movie.description && (
+                                    <p className="text-gray-400 text-sm mb-4 line-clamp-3">
+                                        {movie.description}
+                                    </p>
+                                )}
+                                {movie.releaseYear && (
+                                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700">
+                                        <span className="text-sm text-gray-400">
+                                            Released: {movie.releaseYear}
+                                        </span>
+                                        {movie.rating && (
+                                            <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                                                ★ {movie.rating}
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+            </div>
         </div>
-        </div>
-  )
+    )
 }
 
 export default index
